@@ -12,13 +12,11 @@ import {
   FileText,
   Phone,
   Tag,
-  ShieldCheck,
-  Eye
+  ShieldCheck
 } from 'lucide-react';
 import { ServiceReport, CompanySettings, Customer } from '../../types';
 import { formatDate, formatCurrency } from '../../utils/formatters';
 import { generateServiceReportPDF } from '../../utils/pdfGenerator';
-import { ServiceReportPreviewModal } from './ServiceReportPreviewModal';
 
 interface ServiceReportListViewProps {
   reports: ServiceReport[];
@@ -36,7 +34,6 @@ export const ServiceReportListView: React.FC<ServiceReportListViewProps> = ({
   onDeleteReport
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [previewReport, setPreviewReport] = useState<ServiceReport | null>(null);
 
   const safeReports = Array.isArray(reports) ? reports : [];
 
@@ -200,21 +197,12 @@ export const ServiceReportListView: React.FC<ServiceReportListViewProps> = ({
 
                   <div className="flex items-center gap-2 self-end md:self-center shrink-0">
                     <button
-                      onClick={() => setPreviewReport(rep)}
-                      className="px-3 py-1.5 text-xs font-semibold text-purple-700 bg-white hover:bg-purple-50 border border-purple-200 rounded-xl shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
-                      title="Preview Service Report"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-purple-600" />
-                      <span>Preview</span>
-                    </button>
-
-                    <button
                       onClick={() => generateServiceReportPDF(rep, companySettings)}
-                      className="px-3 py-1.5 text-xs font-semibold text-slate-700 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                      className="px-3 py-1.5 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl shadow-2xs flex items-center gap-1.5 transition-colors cursor-pointer"
                       title="Download PDF Report"
                     >
                       <Download className="w-3.5 h-3.5" />
-                      <span>PDF</span>
+                      <span>Download PDF</span>
                     </button>
 
                     <button
@@ -231,14 +219,6 @@ export const ServiceReportListView: React.FC<ServiceReportListViewProps> = ({
           </div>
         )}
       </div>
-
-      {/* Service Report Preview Modal */}
-      <ServiceReportPreviewModal
-        isOpen={Boolean(previewReport)}
-        report={previewReport}
-        companySettings={companySettings}
-        onClose={() => setPreviewReport(null)}
-      />
     </div>
   );
 };

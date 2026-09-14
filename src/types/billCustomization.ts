@@ -70,7 +70,6 @@ export interface LogoCustomization {
   logoUrl?: string;
   size: 'small' | 'medium' | 'large';
   position: 'top_left' | 'top_center' | 'top_right';
-  showOnSecondPage?: boolean;
 }
 
 export interface CustomerSectionCustomization {

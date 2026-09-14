@@ -236,12 +236,6 @@ export const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                     <span className="text-[10px] font-bold uppercase text-slate-400 block">Invoice Information:</span>
                     <p className="text-slate-600"><strong>Invoice Date:</strong> {formatDate(invoice.invoiceDate)}</p>
                     <p className="text-slate-600"><strong>Due Date:</strong> {formatDate(invoice.dueDate)}</p>
-                    {invoice.poNumber && (
-                      <p className="text-slate-600"><strong>PO / Work Order:</strong> <span className="font-mono font-semibold">{invoice.poNumber}</span></p>
-                    )}
-                    {invoice.poDate && (
-                      <p className="text-slate-600"><strong>PO Date:</strong> {formatDate(invoice.poDate)}</p>
-                    )}
                     <p className="text-slate-600">
                       <strong>Taxation:</strong> {invoice.isInterstate ? 'Interstate (IGST 18%)' : 'Intra-State (CGST 9% + SGST 9%)'}
                     </p>

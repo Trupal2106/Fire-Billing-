@@ -96,13 +96,12 @@ export async function generateInvoicePDF(
 
   const showLogo = customSettings?.logo?.showLogo !== false;
   let textStartX = marginX;
-  let logoPng: string | null = null;
 
   // Embed Logo if enabled
   if (showLogo) {
     try {
       const rawLogoSvg = customSettings?.logo?.logoUrl || company.logo || getFireShieldLogoDataUrl();
-      logoPng = await svgToPngDataUrl(rawLogoSvg, 200, 200);
+      const logoPng = await svgToPngDataUrl(rawLogoSvg, 200, 200);
       const logoW = customSettings?.logo?.size === 'large' ? 24 : customSettings?.logo?.size === 'small' ? 14 : 18;
       doc.addImage(logoPng, 'PNG', marginX, 16, logoW, logoW);
       textStartX = marginX + logoW + 4;
@@ -155,8 +154,6 @@ export async function generateInvoicePDF(
   doc.text(compMsme, msmeOffset + 11, nextY + 3.8);
 
   // 3. Invoice Meta Banner
-  const hasPo = Boolean(invoice.poNumber || invoice.poDate);
-  const bannerHeight = hasPo ? 12 : 7;
   const bannerY = nextY + 7.5;
   // Solid top border line
   doc.setDrawColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
@@ -165,10 +162,10 @@ export async function generateInvoicePDF(
 
   // Light gray / header fill
   doc.setFillColor(headerBgRgb[0], headerBgRgb[1], headerBgRgb[2]);
-  doc.rect(marginX, bannerY + 0.8, contentWidth, bannerHeight, 'F');
+  doc.rect(marginX, bannerY + 0.8, contentWidth, 7, 'F');
 
-  // Meta Texts - Row 1
-  const metaTextY = bannerY + 5;
+  // Meta Texts
+  const metaTextY = bannerY + 5.5;
   doc.setFontSize(8.5);
   // Left: Invoice No
   doc.setFont('helvetica', 'bold');
@@ -178,6 +175,7 @@ export async function generateInvoicePDF(
   doc.text(invoice.invoiceNo, marginX + 3 + doc.getTextWidth('Invoice No.: '), metaTextY);
 
   // Center: Invoice Date
+  const centerText = `Invoice Date: ${formatDate(invoice.invoiceDate)}`;
   doc.setFont('helvetica', 'bold');
   doc.text('Invoice Date: ', pageWidth / 2 - 16, metaTextY);
   doc.setFont('helvetica', 'normal');
@@ -191,27 +189,8 @@ export async function generateInvoicePDF(
   doc.setFont('helvetica', 'normal');
   doc.text(dueDateStr, marginX + contentWidth - doc.getTextWidth(dueDateStr) - 3, metaTextY);
 
-  // Meta Texts - Row 2 (if PO Number or PO Date exists)
-  if (hasPo) {
-    const poRowY = bannerY + 10;
-    doc.setFontSize(8);
-    if (invoice.poNumber) {
-      doc.setFont('helvetica', 'bold');
-      doc.text('PO No.: ', marginX + 3, poRowY);
-      doc.setFont('helvetica', 'normal');
-      doc.text(invoice.poNumber, marginX + 3 + doc.getTextWidth('PO No.: '), poRowY);
-    }
-    if (invoice.poDate) {
-      const poDateStr = formatDate(invoice.poDate);
-      doc.setFont('helvetica', 'bold');
-      doc.text('PO Date: ', pageWidth / 2 - 16, poRowY);
-      doc.setFont('helvetica', 'normal');
-      doc.text(poDateStr, pageWidth / 2 - 16 + doc.getTextWidth('PO Date: '), poRowY);
-    }
-  }
-
   // 4. BILL TO & SHIP TO Sections (2 Columns)
-  const partyY = bannerY + bannerHeight + 6;
+  const partyY = bannerY + 13;
   const colWidth = (contentWidth - 6) / 2;
 
   // BILL TO
@@ -412,7 +391,7 @@ export async function generateInvoicePDF(
   let leftY = finalY;
 
   // BANK DETAILS
-  const showBank = invoice.showBankDetails !== false && customSettings?.bank?.showBankDetails !== false;
+  const showBank = customSettings?.bank?.showBankDetails !== false;
   if (showBank) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8.5);
@@ -448,7 +427,7 @@ export async function generateInvoicePDF(
   }
 
   // PAYMENT QR CODE
-  const showQr = invoice.showPaymentQr !== false && customSettings?.qr?.showQr !== false;
+  const showQr = customSettings?.qr?.showQr !== false;
   if (showQr) {
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8.5);
@@ -581,128 +560,50 @@ export async function generateInvoicePDF(
     doc.text(compName, marginX + contentWidth, rightY, { align: 'right' });
   }
 
-  // Multi-page header and footer enhancement (repeats logo on 2nd and subsequent pages if enabled)
-  const totalPages = doc.getNumberOfPages();
-  const showOnSecondPage = customSettings?.logo?.showOnSecondPage !== false;
-
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p);
-
-    // Header for Page 2 and above
-    if (p > 1) {
-      if (showLogo && showOnSecondPage && logoPng) {
-        try {
-          doc.addImage(logoPng, 'PNG', marginX, 6, 12, 12);
-        } catch (e) {
-          // fallback if logo fails
-        }
-      }
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(primaryRgb[0], primaryRgb[1], primaryRgb[2]);
-      const headerTextX = (showLogo && showOnSecondPage && logoPng) ? marginX + 15 : marginX;
-      doc.text(compName, headerTextX, 11);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Tax Invoice ${invoice.invoiceNo}  |  Date: ${formatDate(invoice.invoiceDate)}`, headerTextX, 15.5);
-
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.4);
-      doc.line(marginX, 20, marginX + contentWidth, 20);
-    }
-
-    // Page Number Footer (All pages)
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.5);
-    doc.setTextColor(148, 163, 184);
-    doc.text(
-      `Page ${p} of ${totalPages}  •  Generated via Fire Safety Billing Console`,
-      pageWidth / 2,
-      pageHeight - 6,
-      { align: 'center' }
-    );
-  }
-
   // Download PDF
   doc.save(`${invoice.invoiceNo.replace(/\//g, '_')}.pdf`);
 }
 
 
 // 2. QUOTATION PDF GENERATOR
-export async function generateQuotationPDF(
-  quotation: Quotation,
-  company: CompanySettings,
-  customSettings?: BillCustomizationSettings
-) {
+export function generateQuotationPDF(quotation: Quotation, company: CompanySettings) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const marginX = 14;
-  const contentWidth = pageWidth - marginX * 2;
 
-  // Company Details
+  // Top Header Banner
+  doc.setFillColor(30, 41, 59); // Slate Dark
+  doc.rect(0, 0, pageWidth, 28, 'F');
+
+  // Company Name
   const compName = (company.companyName || company.name || 'FIRE CARE SAFETY SOLUTION').toUpperCase();
   const compPhone = company.phone || company.mobile || '9499819990';
   const compGstin = company.gstin || '24AAAFP1234F1Z8';
   const compPan = company.pan || (compGstin.length >= 12 ? compGstin.substring(2, 12) : 'FZWP1941R');
-  const compEmail = company.email || 'firecaresafetysolution@gmail.com';
 
-  let logoPng: string | null = null;
-  const showLogo = customSettings?.logo?.showLogo !== false;
-
-  // Prepare Logo
-  if (showLogo) {
-    try {
-      const rawLogoSvg = customSettings?.logo?.logoUrl || company.logo || getFireShieldLogoDataUrl();
-      logoPng = await svgToPngDataUrl(rawLogoSvg, 200, 200);
-    } catch (e) {
-      console.error('Quotation logo load note:', e);
-    }
-  }
-
-  // Top Header Banner
-  doc.setFillColor(30, 41, 59); // Slate Dark
-  doc.rect(0, 0, pageWidth, 30, 'F');
-
-  // Embed logo on page 1 header if available
-  let headerTextX = 14;
-  if (showLogo && logoPng) {
-    try {
-      doc.addImage(logoPng, 'PNG', 14, 5, 20, 20);
-      headerTextX = 38;
-    } catch (e) {
-      headerTextX = 14;
-    }
-  }
-
-  // Company Name
   doc.setTextColor(255, 255, 255);
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(15);
-  doc.text(compName, headerTextX, 12);
+  doc.setFontSize(16);
+  doc.text(compName, 14, 12);
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.text(company.tagline || 'Fire Protection & Electrical Solutions', headerTextX, 17.5);
-  doc.text(`GSTIN: ${compGstin}  |  PAN: ${compPan}  |  Ph: ${compPhone}`, headerTextX, 22.5);
+  doc.setFontSize(8.5);
+  doc.text(company.tagline || 'Fire Protection & Electrical Solutions', 14, 18);
+  doc.text(`GSTIN: ${compGstin}  |  PAN: ${compPan}  |  Ph: ${compPhone}`, 14, 23);
 
   // Document Title
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(13);
-  doc.text('FORMAL QUOTATION', pageWidth - 14, 13, { align: 'right' });
-  doc.setFontSize(8);
+  doc.setFontSize(14);
+  doc.text('FORMAL QUOTATION', pageWidth - 14, 14, { align: 'right' });
+  doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Valid Until: ${formatDate(quotation.validUntil)}`, pageWidth - 14, 18.5, { align: 'right' });
+  doc.text(`Valid Until: ${formatDate(quotation.validUntil)}`, pageWidth - 14, 20, { align: 'right' });
 
   // Customer & Meta Info Box
-  const y = 35;
-  const boxHeight = quotation.poNumber || quotation.poDate ? 44 : 36;
+  const y = 34;
   doc.setDrawColor(226, 232, 240);
   doc.setFillColor(LIGHT_GRAY[0], LIGHT_GRAY[1], LIGHT_GRAY[2]);
-  doc.roundedRect(14, y, 88, boxHeight, 2, 2, 'FD');
-  doc.roundedRect(108, y, 88, boxHeight, 2, 2, 'FD');
+  doc.roundedRect(14, y, 88, 36, 2, 2, 'FD');
+  doc.roundedRect(108, y, 88, 36, 2, 2, 'FD');
 
   // Left: Customer
   doc.setTextColor(DARK_SLATE[0], DARK_SLATE[1], DARK_SLATE[2]);
@@ -741,24 +642,6 @@ export async function generateQuotationPDF(
   doc.setFont('helvetica', 'bold');
   doc.text(quotation.status.toUpperCase(), 145, y + 25);
 
-  let qDetailOffset = y + 25;
-  if (quotation.poNumber) {
-    qDetailOffset += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(71, 85, 105);
-    doc.text('PO Number:', 112, qDetailOffset);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(DARK_SLATE[0], DARK_SLATE[1], DARK_SLATE[2]);
-    doc.text(quotation.poNumber, 145, qDetailOffset);
-  }
-  if (quotation.poDate) {
-    qDetailOffset += 5;
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(71, 85, 105);
-    doc.text('PO Date:', 112, qDetailOffset);
-    doc.text(formatDate(quotation.poDate), 145, qDetailOffset);
-  }
-
   // Table
   const tableColumns = ['#', 'Item Description / Scope', 'HSN/SAC', 'Qty', 'Unit', 'Rate (₹)', 'Taxable (₹)', 'GST (₹)', 'Total (₹)'];
   const tableRows = quotation.items.map((item, idx) => [
@@ -774,7 +657,7 @@ export async function generateQuotationPDF(
   ]);
 
   autoTable(doc, {
-    startY: y + boxHeight + 4,
+    startY: y + 40,
     head: [tableColumns],
     body: tableRows,
     theme: 'grid',
@@ -790,96 +673,12 @@ export async function generateQuotationPDF(
       textColor: [30, 41, 59],
       cellPadding: 2.5
     },
-    margin: { left: 14, right: 14, top: 25 }
+    margin: { left: 14, right: 14 }
   });
 
   const finalY = (doc as any).lastAutoTable.finalY + 6;
 
-  // Left Column: Bank Details & UPI QR Code (if enabled)
-  const leftColX = 14;
-  let leftY = finalY;
-
-  const showBank = quotation.showBankDetails !== false && customSettings?.bank?.showBankDetails !== false;
-  if (showBank) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(PRIMARY_COLOR[0], PRIMARY_COLOR[1], PRIMARY_COLOR[2]);
-    doc.text('BANK DETAILS (FOR ADVANCE PAYMENT)', leftColX, leftY);
-
-    leftY += 4.5;
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    doc.text('Account Name: ', leftColX, leftY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(company.accountName || compName, leftColX + 22, leftY);
-
-    leftY += 3.6;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Bank & Branch: ', leftColX, leftY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`${company.bankName || 'Central Bank of India'}, ${company.branch || 'BRANCH'}`, leftColX + 22, leftY);
-
-    leftY += 3.6;
-    doc.setFont('helvetica', 'bold');
-    doc.text('Account No: ', leftColX, leftY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(company.accountNumber || '5959030132', leftColX + 22, leftY);
-
-    leftY += 3.6;
-    doc.setFont('helvetica', 'bold');
-    doc.text('IFSC Code: ', leftColX, leftY);
-    doc.setFont('helvetica', 'normal');
-    doc.text(company.ifscCode || 'CBIN0280548', leftColX + 22, leftY);
-    leftY += 6;
-  }
-
-  const showQr = quotation.showPaymentQr !== false && customSettings?.qr?.showQr !== false;
-  if (showQr) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
-    doc.setTextColor(PRIMARY_COLOR[0], PRIMARY_COLOR[1], PRIMARY_COLOR[2]);
-    doc.text('SCAN & PAY VIA UPI', leftColX, leftY);
-
-    leftY += 4.5;
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(0, 0, 0);
-    doc.text('UPI ID: ', leftColX, leftY);
-    doc.setFont('helvetica', 'normal');
-    const upiId = company.upiId || '919499819990@centralbank';
-    doc.text(upiId, leftColX + 12, leftY);
-
-    try {
-      const qrDataUrl = await generateUpiQrDataUrl({
-        upiId,
-        payeeName: compName,
-        amount: quotation.grandTotal,
-        invoiceNo: quotation.quotationNo,
-        note: `Quotation ${quotation.quotationNo}`
-      }, 140);
-      if (qrDataUrl) {
-        doc.addImage(qrDataUrl, 'PNG', leftColX + 65, leftY - 4, 18, 18);
-      }
-    } catch (e) {
-      console.error('Quotation QR error:', e);
-    }
-    leftY += 8;
-  }
-
-  // Terms and Note
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(8);
-  doc.setTextColor(DARK_SLATE[0], DARK_SLATE[1], DARK_SLATE[2]);
-  doc.text('TERMS OF OFFER:', leftColX, leftY);
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(7);
-  doc.setTextColor(100, 116, 139);
-  doc.text(`1. Prices quoted are valid until ${formatDate(quotation.validUntil)}.`, leftColX, leftY + 5);
-  doc.text('2. Standard delivery period: 3-5 working days from PO confirmation.', leftColX, leftY + 9);
-  doc.text('3. Payment Terms: 50% Advance with Purchase Order, Balance against delivery/commissioning.', leftColX, leftY + 13);
-
-  // Right: Totals Box
+  // Totals Box
   doc.setFillColor(LIGHT_GRAY[0], LIGHT_GRAY[1], LIGHT_GRAY[2]);
   doc.roundedRect(118, finalY, 78, 38, 2, 2, 'FD');
 
@@ -905,47 +704,17 @@ export async function generateQuotationPDF(
   doc.text('Quoted Total:', 122, ty);
   doc.text(formatCurrency(quotation.grandTotal), 192, ty, { align: 'right' });
 
-  // Multi-page header and footer enhancement (repeats logo on 2nd and subsequent pages if enabled)
-  const totalPages = doc.getNumberOfPages();
-  const showOnSecondPage = customSettings?.logo?.showOnSecondPage !== false;
-
-  for (let p = 1; p <= totalPages; p++) {
-    doc.setPage(p);
-
-    if (p > 1) {
-      if (showLogo && showOnSecondPage && logoPng) {
-        try {
-          doc.addImage(logoPng, 'PNG', 14, 6, 12, 12);
-        } catch (e) {
-          // fallback
-        }
-      }
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(9);
-      doc.setTextColor(PRIMARY_COLOR[0], PRIMARY_COLOR[1], PRIMARY_COLOR[2]);
-      const headerTextX = (showLogo && showOnSecondPage && logoPng) ? 30 : 14;
-      doc.text(compName, headerTextX, 11);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`Quotation ${quotation.quotationNo}  |  Date: ${formatDate(quotation.date)}`, headerTextX, 15.5);
-
-      doc.setDrawColor(226, 232, 240);
-      doc.setLineWidth(0.4);
-      doc.line(14, 20, 14 + contentWidth, 20);
-    }
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(6.5);
-    doc.setTextColor(148, 163, 184);
-    doc.text(
-      `Page ${p} of ${totalPages}  •  Generated via Fire Safety Billing Console`,
-      pageWidth / 2,
-      pageHeight - 6,
-      { align: 'center' }
-    );
-  }
+  // Terms and Note
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  doc.setTextColor(DARK_SLATE[0], DARK_SLATE[1], DARK_SLATE[2]);
+  doc.text('TERMS OF OFFER:', 14, finalY + 6);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`1. Prices quoted are valid until ${formatDate(quotation.validUntil)}.`, 14, finalY + 12);
+  doc.text('2. Standard delivery period: 3-5 working days from PO confirmation.', 14, finalY + 16);
+  doc.text('3. Payment Terms: 50% Advance with Purchase Order, Balance against delivery/commissioning.', 14, finalY + 20);
 
   doc.save(`${quotation.quotationNo.replace(/\//g, '_')}.pdf`);
 }

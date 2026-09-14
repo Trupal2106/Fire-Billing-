@@ -908,31 +908,6 @@ export const BillCustomizationView: React.FC<BillCustomizationViewProps> = ({
                       ))}
                     </div>
                   </div>
-
-                  {/* Multi-Page / 2nd Page Logo Option */}
-                  <div className="pt-3 border-t border-slate-100">
-                    <label className="flex items-start gap-2.5 cursor-pointer p-2.5 rounded-lg bg-slate-50 hover:bg-slate-100/70 border border-slate-200 transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={currentDesign.logo.showOnSecondPage !== false}
-                        onChange={e =>
-                          setCurrentDesign(prev => ({
-                            ...prev,
-                            logo: { ...prev.logo, showOnSecondPage: e.target.checked }
-                          }))
-                        }
-                        className="rounded-xs text-red-600 focus:ring-red-500 w-4 h-4 mt-0.5"
-                      />
-                      <div>
-                        <span className="font-bold text-slate-800 block text-xs">
-                          Show Logo on 2nd Page & Subsequent Pages
-                        </span>
-                        <span className="text-[11px] text-slate-500 block mt-0.5">
-                          Repeats company brand logo in the header on Page 2 and above for multi-page invoices and quotations.
-                        </span>
-                      </div>
-                    </label>
-                  </div>
                 </div>
               </div>
             )}

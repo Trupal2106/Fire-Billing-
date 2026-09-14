@@ -306,8 +306,7 @@ export function createDefaultBillSettings(templateId: TemplateId = 'classic_gst_
     logo: {
       showLogo: true,
       size: 'medium',
-      position: 'top_left',
-      showOnSecondPage: true
+      position: 'top_left'
     },
     customer: {
       showBillTo: true,

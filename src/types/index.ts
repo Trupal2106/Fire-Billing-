@@ -38,7 +38,6 @@ export interface CompanySettings {
   enableEInvoicing?: boolean;
   enableTds?: boolean;
   enableTcs?: boolean;
-  businessDetails?: { key: string; value: string }[];
   address: string;
   city: string;
   state: string;
@@ -80,7 +79,6 @@ export interface CompanySettings {
 
 export interface Customer {
   id: string;
-  companyId?: string;
   name: string;
   companyName?: string;
   contactPerson?: string;
@@ -106,7 +104,6 @@ export interface Customer {
 
 export interface ProductItem {
   id: string;
-  companyId?: string;
   name: string;
   type: ItemType;
   category?: string;
@@ -149,14 +146,9 @@ export interface LineItem {
 
 export interface Invoice {
   id: string;
-  companyId?: string;
   invoiceNo: string;
   invoiceDate: string; // YYYY-MM-DD
   dueDate: string;
-  poNumber?: string;
-  poDate?: string;
-  showBankDetails?: boolean;
-  showPaymentQr?: boolean;
   customerId: string;
   customerName: string;
   customerGstin?: string;
@@ -187,14 +179,9 @@ export interface Invoice {
 
 export interface Quotation {
   id: string;
-  companyId?: string;
   quotationNo: string;
   date: string;
   validUntil: string;
-  poNumber?: string;
-  poDate?: string;
-  showBankDetails?: boolean;
-  showPaymentQr?: boolean;
   customerId: string;
   customerName: string;
   customerGstin?: string;
@@ -222,7 +209,6 @@ export interface Quotation {
 
 export interface PaymentReceipt {
   id: string;
-  companyId?: string;
   receiptNo: string;
   paymentDate: string;
   customerId: string;
@@ -254,7 +240,6 @@ export interface PurchaseItem {
 
 export interface Purchase {
   id: string;
-  companyId?: string;
   purchaseNo?: string;
   purchaseInvoiceNo?: string;
   supplierName: string;
@@ -275,7 +260,6 @@ export interface Purchase {
 
 export interface Expense {
   id: string;
-  companyId?: string;
   date?: string;
   expenseDate?: string;
   category: string;
@@ -371,7 +355,6 @@ export interface ServiceMaterialUsed {
 
 export interface ServiceReport {
   id: string;
-  companyId?: string;
   reportNo: string;
   date: string;
   customerId: string;

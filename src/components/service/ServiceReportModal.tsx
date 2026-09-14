@@ -8,16 +8,13 @@ import {
   Plus,
   Trash2,
   AlertTriangle,
-  Building2,
-  Eye
+  Building2
 } from 'lucide-react';
-import { ServiceReport, Customer, ServiceMaterialUsed, CompanySettings } from '../../types';
-import { ServiceReportPreviewModal } from './ServiceReportPreviewModal';
+import { ServiceReport, Customer, ServiceMaterialUsed } from '../../types';
 
 interface ServiceReportModalProps {
   isOpen: boolean;
   customers: Customer[];
-  companySettings?: CompanySettings;
   onClose: () => void;
   onSaveReport: (reportData: Omit<ServiceReport, 'id' | 'createdAt'>) => Promise<void>;
 }
@@ -25,7 +22,6 @@ interface ServiceReportModalProps {
 export const ServiceReportModal: React.FC<ServiceReportModalProps> = ({
   isOpen,
   customers,
-  companySettings,
   onClose,
   onSaveReport
 }) => {
@@ -59,7 +55,6 @@ export const ServiceReportModal: React.FC<ServiceReportModalProps> = ({
   const [customerRemarks, setCustomerRemarks] = useState('Job completed satisfactorily.');
   const [technicianSignatureName, setTechnicianSignatureName] = useState('Hardik Patel');
   const [customerSignatureName, setCustomerSignatureName] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
@@ -380,78 +375,25 @@ export const ServiceReportModal: React.FC<ServiceReportModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-between gap-2.5">
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2.5">
             <button
               type="button"
-              onClick={() => setShowPreview(true)}
-              className="px-4 py-2 text-xs font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer"
+              onClick={onClose}
+              className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl"
             >
-              <Eye className="w-3.5 h-3.5" />
-              <span>Preview Inspection Sheet</span>
+              Cancel
             </button>
-
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="px-5 py-2 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
-              >
-                <Wrench className="w-3.5 h-3.5" />
-                <span>{isSaving ? 'Saving...' : 'Save Inspection Report'}</span>
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={isSaving}
+              className="px-5 py-2 text-xs font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-xl shadow-sm transition-all active:scale-95 disabled:opacity-50 flex items-center gap-1.5"
+            >
+              <Wrench className="w-3.5 h-3.5" />
+              <span>{isSaving ? 'Saving...' : 'Save Inspection Report'}</span>
+            </button>
           </div>
         </form>
       </div>
-
-      {/* Service Report Live Preview Modal */}
-      {showPreview && (
-        <ServiceReportPreviewModal
-          isOpen={showPreview}
-          report={{
-            id: 'draft',
-            reportNo,
-            date,
-            customerId: selectedCustomer?.id || '',
-            customerName: selectedCustomer?.name || 'Client',
-            siteAddress: siteAddress || selectedCustomer?.billingAddress || '',
-            equipmentType,
-            equipmentSerialNo,
-            technicianName,
-            technicianPhone,
-            inspectionDetails,
-            findings,
-            defects,
-            recommendedAction,
-            materialsUsed,
-            labourCharge,
-            totalBillable,
-            status: 'Completed',
-            customerRemarks,
-            customerSignatureName,
-            technicianSignatureName,
-            createdAt: new Date().toISOString()
-          }}
-          companySettings={companySettings || {
-            id: 'default',
-            companyName: 'FIRE CARE SAFETY SOLUTION',
-            address: 'Shop No 4, Ground Floor, Golden Plaza',
-            city: 'Ahmedabad',
-            state: 'Gujarat',
-            pincode: '382350',
-            phone: '9499819990',
-            email: 'info@firecaresafety.com'
-          } as any}
-          onClose={() => setShowPreview(false)}
-        />
-      )}
     </div>
   );
 };

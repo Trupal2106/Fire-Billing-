@@ -107,7 +107,7 @@ export const BillPreviewCard: React.FC<BillPreviewCardProps> = ({
       </div>
 
       {/* Invoice Meta Bar */}
-      <div className="border-t-4 border-black bg-slate-100 px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-medium mb-4">
+      <div className="border-t-4 border-black bg-slate-100 px-4 py-2.5 flex items-center justify-between text-xs sm:text-sm font-medium mb-4">
         <div>
           <span className="font-bold text-slate-900">Invoice No.:</span>{' '}
           <span className="font-semibold text-slate-950">{invoice.invoiceNo}</span>
@@ -120,18 +120,6 @@ export const BillPreviewCard: React.FC<BillPreviewCardProps> = ({
           <span className="font-bold text-slate-900">Due Date:</span>{' '}
           <span className="font-semibold text-slate-950">{formatDate(invoice.dueDate)}</span>
         </div>
-        {invoice.poNumber && (
-          <div>
-            <span className="font-bold text-slate-900">PO No.:</span>{' '}
-            <span className="font-semibold text-slate-950 font-mono">{invoice.poNumber}</span>
-          </div>
-        )}
-        {invoice.poDate && (
-          <div>
-            <span className="font-bold text-slate-900">PO Date:</span>{' '}
-            <span className="font-semibold text-slate-950">{formatDate(invoice.poDate)}</span>
-          </div>
-        )}
       </div>
 
       {/* Bill To & Ship To Columns */}
@@ -240,49 +228,45 @@ export const BillPreviewCard: React.FC<BillPreviewCardProps> = ({
         {/* Left 6 Columns */}
         <div className="md:col-span-6 space-y-4">
           {/* Bank Details */}
-          {invoice.showBankDetails !== false && (
-            <div>
-              <h4 className="font-black text-slate-950 uppercase tracking-wide text-xs mb-1.5">
-                BANK DETAILS
-              </h4>
-              <div className="space-y-0.5 text-[11.5px] text-slate-900 font-medium">
-                <p><strong>Name:</strong> {compName}</p>
-                <p><strong>IFSC Code:</strong> {companySettings.ifscCode || 'CBIN0280548'}</p>
-                <p><strong>Account No:</strong> {companySettings.accountNumber || '5959030132'}</p>
-                <p><strong>Bank:</strong> {companySettings.bankName || 'Central Bank of India'}, {companySettings.branch || 'BRANCH'}</p>
-              </div>
+          <div>
+            <h4 className="font-black text-slate-950 uppercase tracking-wide text-xs mb-1.5">
+              BANK DETAILS
+            </h4>
+            <div className="space-y-0.5 text-[11.5px] text-slate-900 font-medium">
+              <p><strong>Name:</strong> {compName}</p>
+              <p><strong>IFSC Code:</strong> {companySettings.ifscCode || 'CBIN0280548'}</p>
+              <p><strong>Account No:</strong> {companySettings.accountNumber || '5959030132'}</p>
+              <p><strong>Bank:</strong> {companySettings.bankName || 'Central Bank of India'}, {companySettings.branch || 'BRANCH'}</p>
             </div>
-          )}
+          </div>
 
           {/* Payment QR Code */}
-          {invoice.showPaymentQr !== false && (
-            <div>
-              <h4 className="font-black text-slate-950 uppercase tracking-wide text-xs mb-1.5">
-                PAYMENT QR CODE
-              </h4>
-              <div className="flex items-start gap-4">
-                <div className="space-y-1.5 flex-1">
-                  <p className="text-[11.5px] text-slate-900">
-                    <strong>UPI ID:</strong> {companySettings.upiId || '919499819990@centralbank'}
-                  </p>
-                  {/* UPI Apps Icons Strip */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">PhonePe</span>
-                    <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">GPay</span>
-                    <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">Paytm</span>
-                    <span className="text-[10px] font-extrabold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">UPI</span>
-                  </div>
+          <div>
+            <h4 className="font-black text-slate-950 uppercase tracking-wide text-xs mb-1.5">
+              PAYMENT QR CODE
+            </h4>
+            <div className="flex items-start gap-4">
+              <div className="space-y-1.5 flex-1">
+                <p className="text-[11.5px] text-slate-900">
+                  <strong>UPI ID:</strong> {companySettings.upiId || '919499819990@centralbank'}
+                </p>
+                {/* UPI Apps Icons Strip */}
+                <div className="flex items-center gap-2 pt-1">
+                  <span className="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-200">PhonePe</span>
+                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200">GPay</span>
+                  <span className="text-[10px] font-bold text-sky-600 bg-sky-50 px-1.5 py-0.5 rounded border border-sky-200">Paytm</span>
+                  <span className="text-[10px] font-extrabold text-slate-800 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-300">UPI</span>
                 </div>
-
-                {/* QR Image */}
-                {qrDataUrl && (
-                  <div className="w-20 h-20 sm:w-22 sm:h-22 border border-slate-300 p-1 bg-white shrink-0">
-                    <img src={qrDataUrl} alt="Payment QR Code" className="w-full h-full object-contain" />
-                  </div>
-                )}
               </div>
+
+              {/* QR Image */}
+              {qrDataUrl && (
+                <div className="w-20 h-20 sm:w-22 sm:h-22 border border-slate-300 p-1 bg-white shrink-0">
+                  <img src={qrDataUrl} alt="Payment QR Code" className="w-full h-full object-contain" />
+                </div>
+              )}
             </div>
-          )}
+          </div>
 
           {/* Terms and Conditions */}
           <div className="pt-2">
