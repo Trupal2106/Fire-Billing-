@@ -1,0 +1,6 @@
+{
+  "name": "Patel Fire Billing",
+  "description": "GST billing, inventory, AMC contracts, service reports, and business management for FIRE CARE SAFETY SOLUTION.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

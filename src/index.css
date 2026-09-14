@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  header, nav, button, .no-print, [role="navigation"] {
+    display: none !important;
+  }
+}
+
